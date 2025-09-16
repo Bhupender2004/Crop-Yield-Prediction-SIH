@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { PredictionForm } from "@/components/PredictionForm";
 import { PredictionResult } from "@/components/PredictionResult";
+import { PredictionCharts } from "@/components/PredictionCharts";
+import { FarmerChatbot } from "@/components/FarmerChatbot";
+import { RecommendationEngine } from "@/components/RecommendationEngine";
+import { AnomalyDetection } from "@/components/AnomalyDetection";
+import { PredictionHistory } from "@/components/PredictionHistory";
 import heroImage from "@/assets/hero-agriculture.jpg";
-import { Leaf, TrendingUp, BarChart3 } from "lucide-react";
+import { Leaf, TrendingUp, BarChart3, MessageCircle, Brain, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PredictionData {
@@ -19,6 +24,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [prediction, setPrediction] = useState<any>(null);
   const [inputData, setInputData] = useState<PredictionData | null>(null);
+  const [activeTab, setActiveTab] = useState<'predict' | 'history'>('predict');
 
   const handlePredict = async (data: PredictionData) => {
     setIsLoading(true);
@@ -46,7 +52,8 @@ const Index = () => {
         toast({
           title: "Prediction Error",
           description: result.error,
-          variant: "destructive"
+          variant: "destructive",
+          duration: 4000
         });
         setPrediction(null);
         return;
@@ -67,7 +74,8 @@ const Index = () => {
       toast({
         title: "Connection Error",
         description: "Failed to connect to the prediction service. Please make sure the backend is running.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 4000
       });
       setPrediction(null);
     }
@@ -77,6 +85,12 @@ const Index = () => {
   const resetPrediction = () => {
     setPrediction(null);
     setInputData(null);
+  };
+
+  const handleViewHistory = (record: any) => {
+    setInputData(record.inputData);
+    setPrediction(record.prediction);
+    setActiveTab('predict');
   };
 
   return (
@@ -134,22 +148,103 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex flex-col items-center space-y-8">
-          {!prediction ? (
-            <PredictionForm onPredict={handlePredict} isLoading={isLoading} />
-          ) : (
-            <div className="space-y-6 w-full flex flex-col items-center">
-              <PredictionResult prediction={prediction} inputData={inputData!} />
-              <button
-                onClick={resetPrediction}
-                className="text-primary hover:text-primary/80 font-medium"
-              >
-                ← Make Another Prediction
-              </button>
-            </div>
-          )}
+        {/* Navigation Tabs */}
+        <div className="flex justify-center mb-8">
+          <div className="flex bg-white rounded-lg p-1 shadow-sm border">
+            <button
+              onClick={() => setActiveTab('predict')}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                activeTab === 'predict'
+                  ? 'bg-primary text-white'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Brain className="h-4 w-4 inline mr-2" />
+              Prediction
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                activeTab === 'history'
+                  ? 'bg-primary text-white'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <History className="h-4 w-4 inline mr-2" />
+              History
+            </button>
+          </div>
         </div>
+
+        {/* Main Content */}
+        {activeTab === 'predict' ? (
+          <div className="space-y-8">
+            {/* Prediction Section */}
+            <div className="flex flex-col items-center space-y-8">
+              {!prediction ? (
+                <div className="space-y-8 w-full flex flex-col items-center">
+                  <PredictionForm
+                    onPredict={handlePredict}
+                    isLoading={isLoading}
+                  />
+
+                  {/* AI Chatbot - Below Prediction Form */}
+                  <div className="max-w-2xl w-full">
+                    <FarmerChatbot />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-8 w-full">
+                  {/* Main Prediction Result */}
+                  <div className="flex justify-center">
+                    <PredictionResult prediction={prediction} inputData={inputData!} />
+                  </div>
+
+                  {/* Charts and Visualizations */}
+                  <PredictionCharts
+                    prediction={prediction}
+                    inputData={inputData!}
+                  />
+
+                  {/* Anomaly Detection */}
+                  <AnomalyDetection
+                    prediction={prediction}
+                    inputData={inputData!}
+                  />
+
+                  {/* Recommendations */}
+                  <RecommendationEngine
+                    prediction={prediction}
+                    inputData={inputData!}
+                    weatherData={null}
+                  />
+
+                  {/* Reset Button */}
+                  <div className="flex justify-center">
+                    <button
+                      onClick={resetPrediction}
+                      className="text-primary hover:text-primary/80 font-medium"
+                    >
+                      ← Make Another Prediction
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* History Tab */
+          <div className="max-w-6xl mx-auto">
+            <PredictionHistory
+              currentPrediction={
+                prediction && inputData
+                  ? { inputData, prediction, location: null }
+                  : undefined
+              }
+              onViewPrediction={handleViewHistory}
+            />
+          </div>
+        )}
 
         {/* Information Section */}
         {!prediction && (

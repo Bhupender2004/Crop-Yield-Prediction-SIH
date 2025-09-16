@@ -90,7 +90,8 @@ export const PredictionForm = ({ onPredict, isLoading }: PredictionFormProps) =>
       toast({
         title: "Invalid Year",
         description: "Please enter a valid year between 1900 and 2100.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 4000
       });
       return;
     }
@@ -194,8 +195,10 @@ export const PredictionForm = ({ onPredict, isLoading }: PredictionFormProps) =>
             </div>
           </div>
 
-          <Button 
-            type="submit" 
+
+
+          <Button
+            type="submit"
             className="w-full h-12 text-lg"
             disabled={isLoading}
           >
