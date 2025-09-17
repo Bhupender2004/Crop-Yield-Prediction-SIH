@@ -178,7 +178,7 @@ const Index = () => {
 
         {/* Main Content */}
         {activeTab === 'predict' ? (
-          <div className="space-y-8">
+          <div className="space-y-12">
             {/* Prediction Section */}
             <div className="flex flex-col items-center space-y-8">
               {!prediction ? (
@@ -187,11 +187,6 @@ const Index = () => {
                     onPredict={handlePredict}
                     isLoading={isLoading}
                   />
-
-                  {/* AI Chatbot - Below Prediction Form */}
-                  <div className="max-w-2xl w-full">
-                    <FarmerChatbot />
-                  </div>
                 </div>
               ) : (
                 <div className="space-y-8 w-full">
@@ -230,6 +225,17 @@ const Index = () => {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* AI Chatbot Section - Always Visible */}
+            <div className="flex flex-col items-center border-t border-gray-200 pt-12">
+              <div className="max-w-2xl w-full">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">🤖 Agricultural AI Assistant</h2>
+                  <p className="text-gray-600">Ask questions about farming, crops, or get advice based on your predictions</p>
+                </div>
+                <FarmerChatbot />
+              </div>
             </div>
           </div>
         ) : (
